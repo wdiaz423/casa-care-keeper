@@ -15,7 +15,7 @@ export type FrequencyUnit = 'days' | 'weeks' | 'months' | 'years';
 
 export interface CompletionRecord {
   id: string;
-  date: string; // ISO date
+  date: string;
   notes?: string;
 }
 
@@ -26,10 +26,32 @@ export interface MaintenanceTask {
   description?: string;
   frequencyValue: number;
   frequencyUnit: FrequencyUnit;
-  lastCompleted: string; // ISO date
+  lastCompleted: string;
   completionHistory: CompletionRecord[];
   notes?: string;
+  homeId?: string;
 }
+
+export interface Home {
+  id: string;
+  name: string;
+  address?: string;
+  color: string;
+  icon: string;
+}
+
+export const HOME_ICONS = [
+  { value: 'home', label: '🏠 Casa' },
+  { value: 'building', label: '🏢 Edificio' },
+  { value: 'warehouse', label: '🏗️ Bodega' },
+  { value: 'tree-palm', label: '🏖️ Playa' },
+  { value: 'mountain', label: '⛰️ Montaña' },
+  { value: 'store', label: '🏪 Local' },
+];
+
+export const HOME_COLORS = [
+  '#E97B2C', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B', '#06B6D4', '#EF4444',
+];
 
 export const CATEGORIES: Record<MaintenanceCategory, { label: string; emoji: string }> = {
   plumbing: { label: 'Plomería', emoji: '🔧' },
