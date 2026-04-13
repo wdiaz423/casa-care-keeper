@@ -14,7 +14,7 @@ import type { TaskStatus } from '@/lib/types';
 type FilterType = 'all' | TaskStatus;
 
 const Index = () => {
-  const { tasks, addTask, markCompleted, deleteTask } = useMaintenanceTasks();
+  const { tasks, addTask, updateTask, markCompleted, deleteTask } = useMaintenanceTasks();
   const [filter, setFilter] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<MaintenanceCategory | 'all'>('all');
 
@@ -100,6 +100,7 @@ const Index = () => {
                 task={task}
                 onComplete={markCompleted}
                 onDelete={deleteTask}
+                onUpdate={updateTask}
                 index={i}
               />
             ))
