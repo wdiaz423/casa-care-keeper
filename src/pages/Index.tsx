@@ -6,6 +6,7 @@ import { useMaintenanceTasks } from '@/hooks/use-maintenance-tasks';
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
 import { StatsCards } from '@/components/StatsCards';
+import { RemindersBar } from '@/components/RemindersBar';
 import { CATEGORIES, type MaintenanceCategory } from '@/lib/types';
 import { getTaskStatus, getNextDueDate } from '@/lib/maintenance-utils';
 import { Button } from '@/components/ui/button';
