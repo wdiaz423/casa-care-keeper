@@ -18,7 +18,7 @@ interface TaskCardProps {
   index: number;
 }
 
-export function TaskCard({ task, onComplete, onDelete, index }: TaskCardProps) {
+export function TaskCard({ task, onComplete, onDelete, onUpdate, index }: TaskCardProps) {
   const status = getTaskStatus(task);
   const nextDue = getNextDueDate(task);
   const daysLeft = getDaysUntilDue(task);
@@ -60,7 +60,8 @@ export function TaskCard({ task, onComplete, onDelete, index }: TaskCardProps) {
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <EditTaskDialog task={task} onSave={onUpdate} />
           <Button
             size="icon"
             variant="ghost"
