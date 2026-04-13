@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Filter, LogOut } from 'lucide-react';
+import { Home, Filter, LogOut, Bell, BellRing } from 'lucide-react';
 import { useMaintenanceTasks } from '@/hooks/use-maintenance-tasks';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotifications } from '@/hooks/use-notifications';
+import { toast } from 'sonner';
 
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
@@ -20,6 +22,24 @@ const Index = () => {
   const { user, signOut } = useAuth();
   const [filter, setFilter] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<MaintenanceCategory | 'all'>('all');
+  const { requestPermission } = useNotifications(tasks);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    () => 'Notification' in window && Notification.permission === 'granted'
+  );
+
+  const handleToggleNotifications = async () => {
+    if (notificationsEnabled) {
+      toast.info('Las notificaciones del navegador están activas. Puedes desactivarlas desde la configuración de tu navegador.');
+      return;
+    }
+    const granted = await requestPermission();
+    if (granted) {
+      setNotificationsEnabled(true);
+      toast.success('¡Notificaciones activadas! Recibirás alertas cuando una tarea esté próxima a vencer.');
+    } else {
+      toast.error('Permiso de notificaciones denegado. Puedes activarlas desde la configuración de tu navegador.');
+    }
+  };
 
   const filteredTasks = tasks
     .filter(t => filter === 'all' || getTaskStatus(t) === filter)
@@ -48,6 +68,15 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleNotifications}
+              title={notificationsEnabled ? 'Notificaciones activas' : 'Activar notificaciones'}
+              className={notificationsEnabled ? 'text-primary hover:text-primary/80' : 'text-muted-foreground hover:text-foreground'}
+            >
+              {notificationsEnabled ? <BellRing className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+            </Button>
             <AddTaskDialog onAdd={addTask} />
             <Button variant="ghost" size="icon" onClick={signOut} title="Cerrar sesión" className="text-muted-foreground hover:text-foreground">
               <LogOut className="h-4 w-4" />
