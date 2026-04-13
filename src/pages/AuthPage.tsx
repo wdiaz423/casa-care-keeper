@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Mail, Lock, User } from 'lucide-react';
+import { Sparkles, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -57,24 +57,37 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Subtle background gradient */}
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm space-y-6"
+        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="relative w-full max-w-sm space-y-6"
       >
-        <div className="text-center">
-          <div className="mx-auto h-14 w-14 rounded-xl bg-primary flex items-center justify-center mb-4">
-            <Home className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-heading text-foreground">Mi Hogar</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+        <motion.div 
+          className="text-center"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          <motion.div 
+            className="mx-auto h-16 w-16 rounded-2xl bg-primary flex items-center justify-center mb-5 glow-primary"
+            whileHover={{ rotate: 10, scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <Sparkles className="h-8 w-8 text-primary-foreground" />
+          </motion.div>
+          <h1 className="text-3xl font-heading text-foreground tracking-tight">Mi Hogar</h1>
+          <p className="text-sm text-muted-foreground mt-2">
             {isLogin ? 'Inicia sesión para continuar' : 'Crea tu cuenta'}
           </p>
-        </div>
+        </motion.div>
 
         <Button
           variant="outline"
-          className="w-full gap-2"
+          className="w-full gap-2 h-11 rounded-xl border-border/50 hover:border-border transition-all"
           onClick={handleGoogleLogin}
           disabled={loading}
         >
@@ -89,45 +102,45 @@ const AuthPage = () => {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+            <span className="w-full border-t border-border/50" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">O con email</span>
+            <span className="bg-background px-3 text-muted-foreground tracking-wider">O con email</span>
           </div>
         </div>
 
         <form onSubmit={handleEmailAuth} className="space-y-4">
           {!isLogin && (
-            <div>
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
               <Label htmlFor="name">Nombre</Label>
               <div className="relative mt-1">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" className="pl-9" required />
+                <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre" className="pl-9 h-11 rounded-xl border-border/50" required />
               </div>
-            </div>
+            </motion.div>
           )}
           <div>
             <Label htmlFor="email">Email</Label>
             <div className="relative mt-1">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" className="pl-9" required />
+              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" className="pl-9 h-11 rounded-xl border-border/50" required />
             </div>
           </div>
           <div>
             <Label htmlFor="password">Contraseña</Label>
             <div className="relative mt-1">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-9" required minLength={6} />
+              <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-9 h-11 rounded-xl border-border/50" required minLength={6} />
             </div>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full h-11 rounded-xl glow-primary" disabled={loading}>
             {loading ? 'Cargando...' : isLogin ? 'Iniciar sesión' : 'Crear cuenta'}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
           {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
-          <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline">
+          <button onClick={() => setIsLogin(!isLogin)} className="text-primary font-medium hover:underline underline-offset-4">
             {isLogin ? 'Regístrate' : 'Inicia sesión'}
           </button>
         </p>
