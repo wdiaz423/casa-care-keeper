@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { CategoryBadge } from './CategoryBadge';
 import { StatusIndicator } from './StatusIndicator';
 import { EditTaskDialog } from './EditTaskDialog';
+import { TaskHistoryDialog } from './TaskHistoryDialog';
 import { Button } from '@/components/ui/button';
 import { getTaskStatus, getNextDueDate, getDaysUntilDue } from '@/lib/maintenance-utils';
 import { FREQUENCY_LABELS } from '@/lib/types';
@@ -61,6 +62,7 @@ export function TaskCard({ task, onComplete, onDelete, onUpdate, index }: TaskCa
           )}
         </div>
         <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <TaskHistoryDialog task={task} />
           <EditTaskDialog task={task} onSave={onUpdate} />
           <Button
             size="icon"

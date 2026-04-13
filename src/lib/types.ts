@@ -13,6 +13,12 @@ export type TaskStatus = 'on-track' | 'due-soon' | 'overdue';
 
 export type FrequencyUnit = 'days' | 'weeks' | 'months' | 'years';
 
+export interface CompletionRecord {
+  id: string;
+  date: string; // ISO date
+  notes?: string;
+}
+
 export interface MaintenanceTask {
   id: string;
   title: string;
@@ -21,6 +27,7 @@ export interface MaintenanceTask {
   frequencyValue: number;
   frequencyUnit: FrequencyUnit;
   lastCompleted: string; // ISO date
+  completionHistory: CompletionRecord[];
   notes?: string;
 }
 

@@ -39,6 +39,7 @@ export function AddTaskDialog({ onAdd }: AddTaskDialogProps) {
       frequencyValue: parseInt(freqValue) || 1,
       frequencyUnit: freqUnit,
       lastCompleted: new Date().toISOString(),
+      completionHistory: [],
     });
     reset();
     setOpen(false);
