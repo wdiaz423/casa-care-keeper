@@ -66,16 +66,15 @@ export function useMaintenanceTasks() {
   };
 
   const updateTask = async (id: string, updates: Partial<MaintenanceTask>) => {
-    const dbUpdates: Record<string, any> = {};
-    if (updates.title !== undefined) dbUpdates.title = updates.title;
-    if (updates.category !== undefined) dbUpdates.category = updates.category;
-    if (updates.description !== undefined) dbUpdates.description = updates.description || null;
-    if (updates.frequencyValue !== undefined) dbUpdates.frequency_value = updates.frequencyValue;
-    if (updates.frequencyUnit !== undefined) dbUpdates.frequency_unit = updates.frequencyUnit;
-    if (updates.lastCompleted !== undefined) dbUpdates.last_completed = updates.lastCompleted;
-    if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null;
-
-    const { error } = await supabase.from('maintenance_tasks').update(dbUpdates).eq('id', id);
+    const { error } = await supabase.from('maintenance_tasks').update({
+      title: updates.title,
+      category: updates.category,
+      description: updates.description ?? undefined,
+      frequency_value: updates.frequencyValue,
+      frequency_unit: updates.frequencyUnit,
+      last_completed: updates.lastCompleted,
+      notes: updates.notes ?? undefined,
+    }).eq('id', id);
     if (!error) fetchTasks();
   };
 
