@@ -47,8 +47,12 @@ const Index = () => {
               <p className="text-xs text-muted-foreground">Control de mantenimiento</p>
             </div>
           </div>
-          <AddTaskDialog onAdd={addTask} />
-        </div>
+          <div className="flex items-center gap-2">
+            <AddTaskDialog onAdd={addTask} />
+            <Button variant="ghost" size="icon" onClick={signOut} title="Cerrar sesión" className="text-muted-foreground hover:text-foreground">
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
       </header>
 
       <main className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
