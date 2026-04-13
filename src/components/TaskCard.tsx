@@ -4,6 +4,7 @@ import { Check, Trash2, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CategoryBadge } from './CategoryBadge';
 import { StatusIndicator } from './StatusIndicator';
+import { EditTaskDialog } from './EditTaskDialog';
 import { Button } from '@/components/ui/button';
 import { getTaskStatus, getNextDueDate, getDaysUntilDue } from '@/lib/maintenance-utils';
 import { FREQUENCY_LABELS } from '@/lib/types';
@@ -13,6 +14,7 @@ interface TaskCardProps {
   task: MaintenanceTask;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<MaintenanceTask>) => void;
   index: number;
 }
 
