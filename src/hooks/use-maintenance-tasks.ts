@@ -1,121 +1,101 @@
-import { useState, useEffect } from 'react';
-import type { MaintenanceTask } from '@/lib/types';
-import { generateId } from '@/lib/maintenance-utils';
-
-const STORAGE_KEY = 'home-maintenance-tasks';
-
-const now = Date.now();
-const day = 24 * 60 * 60 * 1000;
-
-const SAMPLE_TASKS: MaintenanceTask[] = [
-  {
-    id: '1',
-    title: 'Revisar filtros del aire acondicionado',
-    category: 'hvac',
-    description: 'Limpiar o reemplazar filtros',
-    frequencyValue: 3,
-    frequencyUnit: 'months',
-    lastCompleted: new Date(now - 80 * day).toISOString(),
-    completionHistory: [
-      { id: 'h1a', date: new Date(now - 80 * day).toISOString() },
-      { id: 'h1b', date: new Date(now - 170 * day).toISOString() },
-    ],
-  },
-  {
-    id: '2',
-    title: 'Limpiar canaletas',
-    category: 'exterior',
-    description: 'Remover hojas y residuos de las canaletas',
-    frequencyValue: 6,
-    frequencyUnit: 'months',
-    lastCompleted: new Date(now - 200 * day).toISOString(),
-    completionHistory: [
-      { id: 'h2a', date: new Date(now - 200 * day).toISOString() },
-    ],
-  },
-  {
-    id: '3',
-    title: 'Podar el jardín',
-    category: 'garden',
-    frequencyValue: 2,
-    frequencyUnit: 'weeks',
-    lastCompleted: new Date(now - 10 * day).toISOString(),
-    completionHistory: [
-      { id: 'h3a', date: new Date(now - 10 * day).toISOString() },
-      { id: 'h3b', date: new Date(now - 24 * day).toISOString() },
-      { id: 'h3c', date: new Date(now - 38 * day).toISOString() },
-    ],
-  },
-  {
-    id: '4',
-    title: 'Revisar detectores de humo',
-    category: 'electrical',
-    description: 'Probar baterías y funcionamiento',
-    frequencyValue: 6,
-    frequencyUnit: 'months',
-    lastCompleted: new Date(now - 30 * day).toISOString(),
-    completionHistory: [
-      { id: 'h4a', date: new Date(now - 30 * day).toISOString() },
-    ],
-  },
-  {
-    id: '5',
-    title: 'Limpieza profunda de cocina',
-    category: 'cleaning',
-    description: 'Electrodomésticos, azulejos y campana',
-    frequencyValue: 1,
-    frequencyUnit: 'months',
-    lastCompleted: new Date(now - 35 * day).toISOString(),
-    completionHistory: [
-      { id: 'h5a', date: new Date(now - 35 * day).toISOString() },
-      { id: 'h5b', date: new Date(now - 65 * day).toISOString() },
-    ],
-  },
-];
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import type { MaintenanceTask, CompletionRecord } from '@/lib/types';
 
 export function useMaintenanceTasks() {
-  const [tasks, setTasks] = useState<MaintenanceTask[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        // Migrate old tasks without completionHistory
-        const parsed: MaintenanceTask[] = JSON.parse(stored);
-        return parsed.map(t => ({
-          ...t,
-          completionHistory: t.completionHistory || [],
-        }));
-      }
-      return SAMPLE_TASKS;
-    } catch {
-      return SAMPLE_TASKS;
-    }
-  });
+  const { user } = useAuth();
+  const [tasks, setTasks] = useState<MaintenanceTask[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
+  const fetchTasks = useCallback(async () => {
+    if (!user) { setTasks([]); setLoading(false); return; }
+    setLoading(true);
 
-  const addTask = (task: MaintenanceTask) => setTasks(prev => [task, ...prev]);
-  
-  const updateTask = (id: string, updates: Partial<MaintenanceTask>) =>
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+    const { data: dbTasks, error } = await supabase
+      .from('maintenance_tasks')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  const deleteTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
+    if (error) { console.error(error); setLoading(false); return; }
 
-  const markCompleted = (id: string, notes?: string) => {
-    const now = new Date().toISOString();
-    setTasks(prev => prev.map(t => {
-      if (t.id !== id) return t;
-      return {
-        ...t,
-        lastCompleted: now,
-        completionHistory: [
-          { id: generateId(), date: now, notes },
-          ...t.completionHistory,
-        ],
-      };
+    // Fetch history for all tasks
+    const taskIds = (dbTasks || []).map(t => t.id);
+    const { data: history } = taskIds.length > 0
+      ? await supabase.from('completion_history').select('*').in('task_id', taskIds).order('completed_at', { ascending: false })
+      : { data: [] };
+
+    const historyMap = new Map<string, CompletionRecord[]>();
+    (history || []).forEach(h => {
+      const arr = historyMap.get(h.task_id) || [];
+      arr.push({ id: h.id, date: h.completed_at, notes: h.notes || undefined });
+      historyMap.set(h.task_id, arr);
+    });
+
+    const mapped: MaintenanceTask[] = (dbTasks || []).map(t => ({
+      id: t.id,
+      title: t.title,
+      category: t.category as MaintenanceTask['category'],
+      description: t.description || undefined,
+      frequencyValue: t.frequency_value,
+      frequencyUnit: t.frequency_unit as MaintenanceTask['frequencyUnit'],
+      lastCompleted: t.last_completed,
+      completionHistory: historyMap.get(t.id) || [],
+      notes: t.notes || undefined,
     }));
+
+    setTasks(mapped);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  const addTask = async (task: MaintenanceTask) => {
+    if (!user) return;
+    const { error } = await supabase.from('maintenance_tasks').insert({
+      user_id: user.id,
+      title: task.title,
+      category: task.category,
+      description: task.description || null,
+      frequency_value: task.frequencyValue,
+      frequency_unit: task.frequencyUnit,
+      last_completed: task.lastCompleted,
+      notes: task.notes || null,
+    });
+    if (!error) fetchTasks();
   };
 
-  return { tasks, addTask, updateTask, deleteTask, markCompleted };
+  const updateTask = async (id: string, updates: Partial<MaintenanceTask>) => {
+    const { error } = await supabase.from('maintenance_tasks').update({
+      title: updates.title,
+      category: updates.category,
+      description: updates.description ?? undefined,
+      frequency_value: updates.frequencyValue,
+      frequency_unit: updates.frequencyUnit,
+      last_completed: updates.lastCompleted,
+      notes: updates.notes ?? undefined,
+    }).eq('id', id);
+    if (!error) fetchTasks();
+  };
+
+  const deleteTask = async (id: string) => {
+    const { error } = await supabase.from('maintenance_tasks').delete().eq('id', id);
+    if (!error) fetchTasks();
+  };
+
+  const markCompleted = async (id: string, notes?: string) => {
+    if (!user) return;
+    const now = new Date().toISOString();
+
+    await supabase.from('maintenance_tasks').update({ last_completed: now }).eq('id', id);
+    await supabase.from('completion_history').insert({
+      task_id: id,
+      user_id: user.id,
+      completed_at: now,
+      notes: notes || null,
+    });
+    fetchTasks();
+  };
+
+  return { tasks, loading, addTask, updateTask, deleteTask, markCompleted };
 }
