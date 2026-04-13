@@ -4,6 +4,7 @@ import { Check, Trash2, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CategoryBadge } from './CategoryBadge';
 import { StatusIndicator } from './StatusIndicator';
+import { EditTaskDialog } from './EditTaskDialog';
 import { Button } from '@/components/ui/button';
 import { getTaskStatus, getNextDueDate, getDaysUntilDue } from '@/lib/maintenance-utils';
 import { FREQUENCY_LABELS } from '@/lib/types';
@@ -13,10 +14,11 @@ interface TaskCardProps {
   task: MaintenanceTask;
   onComplete: (id: string) => void;
   onDelete: (id: string) => void;
+  onUpdate: (id: string, updates: Partial<MaintenanceTask>) => void;
   index: number;
 }
 
-export function TaskCard({ task, onComplete, onDelete, index }: TaskCardProps) {
+export function TaskCard({ task, onComplete, onDelete, onUpdate, index }: TaskCardProps) {
   const status = getTaskStatus(task);
   const nextDue = getNextDueDate(task);
   const daysLeft = getDaysUntilDue(task);
@@ -58,7 +60,8 @@ export function TaskCard({ task, onComplete, onDelete, index }: TaskCardProps) {
             </p>
           )}
         </div>
-        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <EditTaskDialog task={task} onSave={onUpdate} />
           <Button
             size="icon"
             variant="ghost"

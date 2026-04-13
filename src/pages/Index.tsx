@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Filter } from 'lucide-react';
 import { useMaintenanceTasks } from '@/hooks/use-maintenance-tasks';
+
 import { TaskCard } from '@/components/TaskCard';
 import { AddTaskDialog } from '@/components/AddTaskDialog';
 import { StatsCards } from '@/components/StatsCards';
@@ -13,7 +14,7 @@ import type { TaskStatus } from '@/lib/types';
 type FilterType = 'all' | TaskStatus;
 
 const Index = () => {
-  const { tasks, addTask, markCompleted, deleteTask } = useMaintenanceTasks();
+  const { tasks, addTask, updateTask, markCompleted, deleteTask } = useMaintenanceTasks();
   const [filter, setFilter] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<MaintenanceCategory | 'all'>('all');
 
@@ -99,6 +100,7 @@ const Index = () => {
                 task={task}
                 onComplete={markCompleted}
                 onDelete={deleteTask}
+                onUpdate={updateTask}
                 index={i}
               />
             ))
