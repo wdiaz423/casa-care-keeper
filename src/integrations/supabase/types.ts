@@ -46,6 +46,39 @@ export type Database = {
           },
         ]
       }
+      homes: {
+        Row: {
+          address: string | null
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       maintenance_tasks: {
         Row: {
           category: string
@@ -53,6 +86,7 @@ export type Database = {
           description: string | null
           frequency_unit: string
           frequency_value: number
+          home_id: string | null
           id: string
           last_completed: string
           notes: string | null
@@ -66,6 +100,7 @@ export type Database = {
           description?: string | null
           frequency_unit?: string
           frequency_value?: number
+          home_id?: string | null
           id?: string
           last_completed?: string
           notes?: string | null
@@ -79,6 +114,7 @@ export type Database = {
           description?: string | null
           frequency_unit?: string
           frequency_value?: number
+          home_id?: string | null
           id?: string
           last_completed?: string
           notes?: string | null
@@ -86,7 +122,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tasks_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
