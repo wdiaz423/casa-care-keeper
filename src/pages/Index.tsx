@@ -57,6 +57,10 @@ const Index = () => {
       </header>
 
       <main className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {loading ? (
+          <div className="text-center py-16 text-muted-foreground animate-pulse">Cargando tareas...</div>
+        ) : (
+        <>
         {/* Stats */}
         <StatsCards tasks={tasks} />
 
