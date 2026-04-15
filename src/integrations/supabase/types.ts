@@ -46,6 +46,82 @@ export type Database = {
           },
         ]
       }
+      home_invitations: {
+        Row: {
+          created_at: string
+          email: string | null
+          expires_at: string
+          home_id: string
+          id: string
+          invite_code: string
+          invited_by: string
+          role: Database["public"]["Enums"]["home_role"]
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          home_id: string
+          id?: string
+          invite_code?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["home_role"]
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          expires_at?: string
+          home_id?: string
+          id?: string
+          invite_code?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["home_role"]
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_invitations_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_members: {
+        Row: {
+          created_at: string
+          home_id: string
+          id: string
+          role: Database["public"]["Enums"]["home_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          home_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["home_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          home_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["home_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_members_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homes: {
         Row: {
           address: string | null
@@ -164,10 +240,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_home_role: {
+        Args: { _home_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["home_role"]
+      }
+      is_home_member: {
+        Args: { _home_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      home_role: "owner" | "admin" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -294,6 +377,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      home_role: ["owner", "admin", "member"],
+    },
   },
 } as const
