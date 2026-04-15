@@ -84,6 +84,7 @@ const Index = () => {
             />
           </div>
           <div className="flex items-center gap-1">
+            <HomeMembersDialog homeId={selectedHomeId} homeName={selectedHome?.name || 'Hogar'} />
             <Button
               variant="ghost"
               size="icon"
