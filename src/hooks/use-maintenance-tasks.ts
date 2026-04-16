@@ -27,10 +27,24 @@ export function useMaintenanceTasks(homeId?: string | null) {
       ? await supabase.from('completion_history').select('*').in('task_id', taskIds).order('completed_at', { ascending: false })
       : { data: [] };
 
+    const userIds = Array.from(new Set((history || []).map(h => h.user_id)));
+    const { data: profiles } = userIds.length > 0
+      ? await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', userIds)
+      : { data: [] as { user_id: string; display_name: string | null; avatar_url: string | null }[] };
+    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+
     const historyMap = new Map<string, CompletionRecord[]>();
     (history || []).forEach(h => {
       const arr = historyMap.get(h.task_id) || [];
-      arr.push({ id: h.id, date: h.completed_at, notes: h.notes || undefined });
+      const p = profileMap.get(h.user_id);
+      arr.push({
+        id: h.id,
+        date: h.completed_at,
+        notes: h.notes || undefined,
+        userId: h.user_id,
+        completedByName: p?.display_name || 'Usuario',
+        completedByAvatar: p?.avatar_url || null,
+      });
       historyMap.set(h.task_id, arr);
     });
 

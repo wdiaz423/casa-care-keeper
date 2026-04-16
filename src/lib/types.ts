@@ -17,6 +17,9 @@ export interface CompletionRecord {
   id: string;
   date: string;
   notes?: string;
+  userId?: string;
+  completedByName?: string;
+  completedByAvatar?: string | null;
 }
 
 export interface MaintenanceTask {

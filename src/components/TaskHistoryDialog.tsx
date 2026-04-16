@@ -1,11 +1,12 @@
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { History, Clock } from 'lucide-react';
+import { History, Clock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CategoryBadge } from './CategoryBadge';
 import type { MaintenanceTask } from '@/lib/types';
 
@@ -62,6 +63,19 @@ export function TaskHistoryDialog({ task }: TaskHistoryDialogProps) {
                     <p className="text-xs text-muted-foreground mt-0.5 ml-5">
                       {format(new Date(record.date), "HH:mm", { locale: es })} hrs
                     </p>
+                    {record.completedByName && (
+                      <div className="flex items-center gap-2 mt-2 ml-5">
+                        <Avatar className="h-5 w-5">
+                          {record.completedByAvatar && <AvatarImage src={record.completedByAvatar} alt={record.completedByName} />}
+                          <AvatarFallback className="bg-primary/10 text-primary text-[9px] font-semibold">
+                            {record.completedByName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || <User className="h-3 w-3" />}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs text-card-foreground">
+                          Completado por <span className="font-medium">{record.completedByName}</span>
+                        </span>
+                      </div>
+                    )}
                     {record.notes && (
                       <p className="text-xs text-muted-foreground mt-1.5 ml-5 italic">
                         {record.notes}
