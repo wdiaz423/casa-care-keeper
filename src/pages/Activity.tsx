@@ -24,12 +24,23 @@ interface ActivityItem {
   avatar_url: string | null;
 }
 
+type TimeFilter = 'today' | '7d' | '30d' | '90d' | 'all';
+
+const TIME_FILTERS: { value: TimeFilter; label: string }[] = [
+  { value: 'today', label: 'Hoy' },
+  { value: '7d', label: '7 días' },
+  { value: '30d', label: '30 días' },
+  { value: '90d', label: '90 días' },
+  { value: 'all', label: 'Todo' },
+];
+
 export default function Activity() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { homes, selectedHomeId } = useHomes();
   const [items, setItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('30d');
 
   const selectedHome = useMemo(() => homes.find(h => h.id === selectedHomeId), [homes, selectedHomeId]);
 
@@ -83,16 +94,33 @@ export default function Activity() {
     load();
   }, [user, selectedHomeId]);
 
+  const filteredItems = useMemo(() => {
+    if (timeFilter === 'all') return items;
+    const now = Date.now();
+    const ranges: Record<Exclude<TimeFilter, 'all'>, number> = {
+      today: 24 * 60 * 60 * 1000,
+      '7d': 7 * 24 * 60 * 60 * 1000,
+      '30d': 30 * 24 * 60 * 60 * 1000,
+      '90d': 90 * 24 * 60 * 60 * 1000,
+    };
+    const cutoff = now - ranges[timeFilter];
+    if (timeFilter === 'today') {
+      const start = new Date(); start.setHours(0, 0, 0, 0);
+      return items.filter(it => new Date(it.completed_at).getTime() >= start.getTime());
+    }
+    return items.filter(it => new Date(it.completed_at).getTime() >= cutoff);
+  }, [items, timeFilter]);
+
   const grouped = useMemo(() => {
     const map = new Map<string, ActivityItem[]>();
-    items.forEach(it => {
+    filteredItems.forEach(it => {
       const key = format(new Date(it.completed_at), "EEEE d 'de' MMMM, yyyy", { locale: es });
       const arr = map.get(key) || [];
       arr.push(it);
       map.set(key, arr);
     });
     return Array.from(map.entries());
-  }, [items]);
+  }, [filteredItems]);
 
   return (
     <div className="min-h-screen bg-background">
