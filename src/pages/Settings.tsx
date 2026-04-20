@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, User, Camera, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, User, Camera, Save, Loader2, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/hooks/use-theme';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [email, setEmail] = useState('');
@@ -145,6 +148,46 @@ export default function Settings() {
             </Card>
           </motion.div>
         )}
+
+        {/* Theme Settings Card */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle className="text-lg font-heading flex items-center gap-2">
+                <motion.div
+                  className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center"
+                  whileHover={{ scale: 1.1, rotate: theme === 'dark' ? 10 : -10 }}
+                >
+                  {theme === 'dark' ? (
+                    <Moon className="h-4 w-4 text-primary" />
+                  ) : (
+                    <Sun className="h-4 w-4 text-primary" />
+                  )}
+                </motion.div>
+                Tema
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="font-medium text-foreground">
+                    {theme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {theme === 'dark' 
+                      ? 'Interfaz con colores oscuros y turquesa' 
+                      : 'Interfaz con colores claros y cálidos'}
+                  </p>
+                </div>
+                <Switch 
+                  checked={theme === 'dark'} 
+                  onCheckedChange={toggleTheme}
+                  aria-label="Cambiar tema"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
     </div>
   );
