@@ -41,26 +41,31 @@ export function useHomeMembers(homeId: string | null) {
     const { data: membersData } = await supabase
       .from('home_members')
       .select('*')
-      .eq('home_id', homeId);
+      .eq('home_id', homeId)
+      .order('created_at', { ascending: true });
 
     const membersList: HomeMember[] = (membersData || []).map(m => ({
       id: m.id,
       homeId: m.home_id,
       userId: m.user_id,
       role: m.role as HomeRole,
+      joinedAt: m.created_at,
     }));
 
-    // Fetch profiles for display names
+    // Fetch profiles for display names + avatars
     const userIds = membersList.map(m => m.userId);
     if (userIds.length > 0) {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name')
+        .select('user_id, display_name, avatar_url')
         .in('user_id', userIds);
       
       profiles?.forEach(p => {
         const member = membersList.find(m => m.userId === p.user_id);
-        if (member) member.displayName = p.display_name || undefined;
+        if (member) {
+          member.displayName = p.display_name || undefined;
+          member.avatarUrl = p.avatar_url || null;
+        }
       });
     }
 
