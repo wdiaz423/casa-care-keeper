@@ -130,6 +130,20 @@ export function useHomeMembers(homeId: string | null) {
     fetchMembers();
   };
 
+  const transferOwnership = async (newOwnerMemberId: string) => {
+    if (!user) return false;
+    const me = members.find(m => m.userId === user.id);
+    const target = members.find(m => m.id === newOwnerMemberId);
+    if (!me || me.role !== 'owner' || !target) return false;
+    // Promote target to owner; demote myself to admin
+    const { error: e1 } = await supabase.from('home_members').update({ role: 'owner' }).eq('id', target.id);
+    if (e1) return false;
+    const { error: e2 } = await supabase.from('home_members').update({ role: 'admin' }).eq('id', me.id);
+    if (e2) return false;
+    await fetchMembers();
+    return true;
+  };
+
   const acceptInvitation = async (inviteCode: string) => {
     if (!user) return false;
     const { data: inv } = await supabase
@@ -155,6 +169,7 @@ export function useHomeMembers(homeId: string | null) {
     cancelInvitation,
     updateMemberRole,
     removeMember,
+    transferOwnership,
     acceptInvitation,
     refresh: fetchMembers,
   };
