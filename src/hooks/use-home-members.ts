@@ -11,6 +11,8 @@ export interface HomeMember {
   role: HomeRole;
   displayName?: string;
   email?: string;
+  avatarUrl?: string | null;
+  joinedAt?: string;
 }
 
 export interface HomeInvitation {
