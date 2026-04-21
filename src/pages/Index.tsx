@@ -86,15 +86,6 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-1">
             <HomeMembersAvatars homeId={selectedHomeId} />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate('/members')}
-              title="Gestionar miembros"
-              className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground"
-            >
-              <Users className="h-4 w-4 icon-bounce" />
-            </Button>
             <HomeMembersDialog homeId={selectedHomeId} homeName={selectedHome?.name || 'Hogar'} />
             <Button
               variant="ghost"
