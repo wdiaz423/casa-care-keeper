@@ -184,12 +184,40 @@ Deno.serve(async (req) => {
         if (!VALID_ROLES.includes(role)) {
           return json({ error: "Invalid role" }, 400);
         }
+        // Pre-check: avoid duplicate membership in the same home.
+        const { data: existing, error: existErr } = await supabase
+          .from("home_members")
+          .select("id, role")
+          .eq("home_id", homeId)
+          .eq("user_id", newUserId)
+          .maybeSingle();
+        if (existErr) return json({ error: existErr.message }, 400);
+        if (existing) {
+          return json(
+            {
+              error: "El usuario ya es miembro de este hogar",
+              code: "ALREADY_MEMBER",
+              member: existing,
+            },
+            409,
+          );
+        }
+
         const { data, error } = await supabase
           .from("home_members")
           .insert({ home_id: homeId, user_id: newUserId, role })
           .select()
           .single();
-        if (error) return json({ error: error.message }, 400);
+        if (error) {
+          // Postgres unique_violation fallback (race condition)
+          if ((error as any).code === "23505") {
+            return json(
+              { error: "El usuario ya es miembro de este hogar", code: "ALREADY_MEMBER" },
+              409,
+            );
+          }
+          return json({ error: error.message }, 400);
+        }
         return json({ member: data }, 201);
       }
 
